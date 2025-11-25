@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'main.dart';
 import 'anime_data.dart';
 import 'anime_card.dart';
+import 'anime_detail.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -11,18 +12,21 @@ class CalendarPage extends StatefulWidget {
 }
 
 class _CalendarPageState extends State<CalendarPage> {
-  int selectedDay = DateTime.now().day;
+  int selectedDayOfWeek = DateTime.now().weekday;
   bool isGridView = true;
-  final List<String> weekDays = ['Дав', 'Мяг', 'Лха', 'Пүр', 'Баа', 'Бям', 'Ням'];
-  List<AnimeItem> getAnimeForDay(int day) {
-    return animeList.where((anime) => (anime.episodes % 7) == (day % 7)).toList();
+  final List<String> weekDays = ['Даваа', 'Мягмар', 'Лхагва', 'Пүрэв', 'Баасан', 'Бямба', 'Ням'];
+  final List<String> weekDaysShort = ['Дав', 'Мяг', 'Лха', 'Пүр', 'Баа', 'Бям', 'Ням'];
+
+  List<AnimeItem> getAnimeForDay(int dayOfWeek) {
+    return animeList.where((anime) => (anime.episodes % 7) == (dayOfWeek % 7)).toList();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
-    final selectedAnime = getAnimeForDay(selectedDay);
+    final selectedAnime = getAnimeForDay(selectedDayOfWeek);
     final now = DateTime.now();
-    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0d1117),
@@ -63,57 +67,36 @@ class _CalendarPageState extends State<CalendarPage> {
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: weekDays.map((day) {
-                      return SizedBox(
-                        width: 50,
-                        child: Text(
-                          day,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-                const SizedBox(height: 12),
                 SizedBox(
                   height: 70,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
-                    itemCount: daysInMonth,
+                    itemCount: 7,
                     itemBuilder: (context, index) {
-                      final day = index + 1;
-                      final isSelected = day == selectedDay;
-                      final isToday = day == now.day;
+                      final dayOfWeek = index + 1; // Monday = 1, Sunday = 7
+                      final isSelected = dayOfWeek == selectedDayOfWeek;
+                      final isToday = dayOfWeek == now.weekday;
 
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            selectedDay = day;
+                            selectedDayOfWeek = dayOfWeek;
                           });
                         },
                         child: Container(
-                          width: 50,
+                          width: 80,
                           margin: const EdgeInsets.symmetric(horizontal: 4),
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? Colors.red
                                 : isToday
                                 ? const Color(0xFF1a2744)
-                                : Colors.transparent,
+                                : const Color(0xFF161b22),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: isToday && !isSelected
-                                  ? Colors.red.withOpacity(0.3)
+                                  ? Colors.red.withOpacity(0.5)
                                   : Colors.transparent,
                               width: 2,
                             ),
@@ -122,27 +105,29 @@ class _CalendarPageState extends State<CalendarPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                weekDays[DateTime(now.year, now.month, day).weekday - 1],
-                                style: TextStyle(
-                                  color: isSelected
-                                      ? Colors.white
-                                      : Colors.grey[600],
-                                  fontSize: 11,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '$day',
+                                weekDays[index],
                                 style: TextStyle(
                                   color: isSelected
                                       ? Colors.white
                                       : isToday
                                       ? Colors.white
                                       : Colors.grey[400],
-                                  fontSize: 18,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
+                              if (isToday)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: BoxDecoration(
+                                      color: isSelected ? Colors.white : Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -157,13 +142,36 @@ class _CalendarPageState extends State<CalendarPage> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            color: const Color(0xFF1a2744).withOpacity(0.3),
-            child: Text(
-              '${selectedAnime.length} анимэ гарна',
-              style: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 13,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1a2744).withOpacity(0.3),
+              border: Border(
+                top: BorderSide(
+                  color: Colors.white.withOpacity(0.1),
+                  width: 1,
+                ),
+                bottom: BorderSide(
+                  color: Colors.white.withOpacity(0.1),
+                  width: 1,
+                ),
               ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.tv,
+                  color: Colors.grey[500],
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${weekDays[selectedDayOfWeek - 1]} гарах ${selectedAnime.length} анимэ',
+                  style: TextStyle(
+                    color: Colors.grey[300],
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -180,7 +188,7 @@ class _CalendarPageState extends State<CalendarPage> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Энэ өдөр анимэ гарахгүй',
+                    'Энэ өдөр анимэ гарахгүй байна',
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 16,
@@ -196,34 +204,99 @@ class _CalendarPageState extends State<CalendarPage> {
                 crossAxisCount: 3,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 16,
-                childAspectRatio: 128 / 220,
+                childAspectRatio: 0.58,
               ),
               itemCount: selectedAnime.length,
               itemBuilder: (context, index) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: AnimeCardWidget(
-                        animeItem: selectedAnime[index],
-                        onTap: () {
-                          print('Clicked: ${selectedAnime[index].title}');
-                        },
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AnimeDetailPage(anime: selectedAnime[index]),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      selectedAnime[index].title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        height: 1.2,
+                    );
+                  },
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.1),
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: selectedAnime[index].imagePath.isNotEmpty
+                                ? Image.asset(
+                              selectedAnime[index].imagePath,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        selectedAnime[index].color.withOpacity(0.6),
+                                        selectedAnime[index].color.withOpacity(0.3),
+                                      ],
+                                    ),
+                                  ),
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.broken_image,
+                                      size: 40,
+                                      color: Colors.white54,
+                                    ),
+                                  ),
+                                );
+                              },
+                            )
+                                : Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    selectedAnime[index].color.withOpacity(0.6),
+                                    selectedAnime[index].color.withOpacity(0.3),
+                                  ],
+                                ),
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.play_circle_outline,
+                                  size: 40,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 6),
+                      Text(
+                        selectedAnime[index].title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${selectedAnime[index].episodes}-р анги',
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               },
             )
@@ -232,90 +305,111 @@ class _CalendarPageState extends State<CalendarPage> {
               itemCount: selectedAnime.length,
               itemBuilder: (context, index) {
                 final anime = selectedAnime[index];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1a2744).withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(12),
-                          bottomLeft: Radius.circular(12),
-                        ),
-                        child: Image.asset(
-                          anime.imagePath,
-                          width: 80,
-                          height: 120,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              width: 80,
-                              height: 120,
-                              color: Colors.grey[800],
-                              child: const Icon(
-                                Icons.broken_image,
-                                color: Colors.grey,
-                              ),
-                            );
-                          },
-                        ),
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AnimeDetailPage(anime: anime),
                       ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                anime.title,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
+                    );
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1a2744).withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.05),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            bottomLeft: Radius.circular(12),
+                          ),
+                          child: Image.asset(
+                            anime.imagePath,
+                            width: 80,
+                            height: 120,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: 80,
+                                height: 120,
+                                color: Colors.grey[800],
+                                child: const Icon(
+                                  Icons.broken_image,
+                                  color: Colors.grey,
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.star,
-                                    color: Colors.amber,
-                                    size: 14,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${anime.rating}',
-                                    style: TextStyle(
-                                      color: Colors.grey[400],
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    '${anime.episodes} анги',
-                                    style: TextStyle(
-                                      color: Colors.grey[400],
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                anime.category,
-                                style: TextStyle(
-                                  color: Colors.grey[500],
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ],
+                              );
+                            },
                           ),
                         ),
-                      ),
-                    ],
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  anime.title,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.star,
+                                      color: Colors.amber,
+                                      size: 14,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${anime.rating}',
+                                      style: TextStyle(
+                                        color: Colors.grey[400],
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      '${anime.episodes}-р анги',
+                                      style: TextStyle(
+                                        color: Colors.grey[400],
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  anime.category,
+                                  style: TextStyle(
+                                    color: Colors.grey[500],
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: Icon(
+                            Icons.play_circle_outline,
+                            color: Colors.red.withOpacity(0.7),
+                            size: 32,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

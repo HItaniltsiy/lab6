@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'main.dart';
 import 'anime_data.dart';
 import 'browse_anime_page.dart';
+import 'calendar_page.dart';
+import 'anime_detail.dart';
+import 'search_page.dart';
+
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
+
 class _MainScreenState extends State<MainScreen> {
   int selectedTopIcon = 0;
   int selectedBottomTab = 1;
@@ -14,6 +19,7 @@ class _MainScreenState extends State<MainScreen> {
   String userEmail = '';
   String userPhone = '';
   String userCategory = '';
+
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
@@ -45,9 +51,60 @@ class _MainScreenState extends State<MainScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    _buildTopIcon(1, Icons.search),
+                    // Search Icon - Updated with navigation
+                    GestureDetector(
+                      onTap: () {
+                        setState(() => selectedTopIcon = 1);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SearchPage(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: selectedTopIcon == 1
+                              ? Colors.white.withValues(alpha: 0.2)
+                              : Colors.transparent,
+                        ),
+                        child: Icon(
+                          Icons.search,
+                          color: selectedTopIcon == 1 ? Colors.white : Colors.grey[600],
+                          size: 24,
+                        ),
+                      ),
+                    ),
                     const SizedBox(width: 12),
-                    _buildTopIcon(2, Icons.calendar_month),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() => selectedTopIcon = 2);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CalendarPage(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: selectedTopIcon == 2
+                              ? Colors.white.withValues(alpha: 0.2)
+                              : Colors.transparent,
+                        ),
+                        child: Icon(
+                          Icons.calendar_month,
+                          color: selectedTopIcon == 2 ? Colors.white : Colors.grey[600],
+                          size: 24,
+                        ),
+                      ),
+                    ),
                     const SizedBox(width: 12),
                     _buildTopIcon(3, Icons.notifications_outlined),
                     const SizedBox(width: 12),
@@ -378,89 +435,99 @@ class _MainScreenState extends State<MainScreen> {
     bool showEpisodeNumber = anime.category == 'Үргэлжлүүлэх' ||
         anime.category == 'Шинэ гаргалтууд';
 
-    return Container(
-      width: 120,
-      margin: const EdgeInsets.only(right: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.1),
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: anime.imagePath.isNotEmpty
-                    ? Image.asset(
-                  anime.imagePath,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            anime.color.withValues(alpha: 0.6),
-                            anime.color.withValues(alpha: 0.3),
-                          ],
-                        ),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.broken_image,
-                          size: 40,
-                          color: Colors.white54,
-                        ),
-                      ),
-                    );
-                  },
-                )
-                    : Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        anime.color.withValues(alpha: 0.6),
-                        anime.color.withValues(alpha: 0.3),
-                      ],
-                    ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AnimeDetailPage(anime: anime),
+          ),
+        );
+      },
+      child: Container(
+        width: 120,
+        margin: const EdgeInsets.only(right: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
                   ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.play_circle_outline,
-                      size: 40,
-                      color: Colors.white70,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: anime.imagePath.isNotEmpty
+                      ? Image.asset(
+                    anime.imagePath,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              anime.color.withValues(alpha: 0.6),
+                              anime.color.withValues(alpha: 0.3),
+                            ],
+                          ),
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.broken_image,
+                            size: 40,
+                            color: Colors.white54,
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                      : Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          anime.color.withValues(alpha: 0.6),
+                          anime.color.withValues(alpha: 0.3),
+                        ],
+                      ),
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.play_circle_outline,
+                        size: 40,
+                        color: Colors.white70,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            anime.title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              height: 1.2,
-            ),
-          ),
-          if (showEpisodeNumber) const SizedBox(height: 4),
-          if (showEpisodeNumber)
+            const SizedBox(height: 8),
             Text(
-              '${anime.episodes}-р анги',
-              style: TextStyle(
-                color: Colors.grey[500],
-                fontSize: 11,
+              anime.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                height: 1.2,
               ),
             ),
-        ],
+            if (showEpisodeNumber) const SizedBox(height: 4),
+            if (showEpisodeNumber)
+              Text(
+                '${anime.episodes}-р анги',
+                style: TextStyle(
+                  color: Colors.grey[500],
+                  fontSize: 11,
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
