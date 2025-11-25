@@ -1,0 +1,467 @@
+import 'package:flutter/material.dart';
+import 'main.dart';
+import 'anime_data.dart';
+import 'browse_anime_page.dart';
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+class _MainScreenState extends State<MainScreen> {
+  int selectedTopIcon = 0;
+  int selectedBottomTab = 1;
+  String userName = 'Хэрэглэгч';
+  String userEmail = '';
+  String userPhone = '';
+  String userCategory = '';
+  @override
+  Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    if (args != null) {
+      userName = args['name'] ?? 'Хэрэглэгч';
+      userEmail = args['email'] ?? '';
+      userPhone = args['phone'] ?? '';
+      userCategory = args['category'] ?? '';
+    }
+
+    return Scaffold(
+      body: Column(
+        children: [
+          Container(
+            height: 90,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFF0d1117),
+                  const Color(0xFF0d1117).withValues(alpha: 0.8),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    _buildTopIcon(1, Icons.search),
+                    const SizedBox(width: 12),
+                    _buildTopIcon(2, Icons.calendar_month),
+                    const SizedBox(width: 12),
+                    _buildTopIcon(3, Icons.notifications_outlined),
+                    const SizedBox(width: 12),
+                    _buildTopIcon(4, Icons.qr_code_scanner),
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() => selectedTopIcon = 5);
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            backgroundColor: const Color(0xFF1a2744),
+                            title: const Text(
+                              'Профайл',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Нэр: $userName',
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Имэйл: $userEmail',
+                                  style: const TextStyle(color: Colors.white70),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Утас: $userPhone',
+                                  style: const TextStyle(color: Colors.white70),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Дуртай категори: $userCategory',
+                                  style: const TextStyle(color: Colors.white70),
+                                ),
+                              ],
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('Хаах'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: 45,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: selectedTopIcon == 5
+                                ? Colors.yellow
+                                : Colors.white.withValues(alpha: 0.3),
+                            width: 2,
+                          ),
+                          color: const Color(0xFFFFC107),
+                        ),
+                        child: const Icon(
+                          Icons.person,
+                          color: Colors.black,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+
+                  SizedBox(
+                    height: 40,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      children: [
+                        _buildCategoryChip('Бүх аниме', true),
+                        _buildCategoryChip('1080 HD', false),
+                        _buildCategoryChip('NON', false),
+                        _buildCategoryChip('Tv Tokyo', false),
+                        _buildCategoryChip('Адал явдал', false),
+                        _buildCategoryChip('Аймшиг', false),
+                        _buildCategoryChip('Амьдралын хэв маяг', false),
+                        _buildCategoryChip('Анимэйшн', false),
+                        _buildCategoryChip('Арми', false),
+                        _buildCategoryChip('Гэмт хэрэг', false),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                  _buildSectionHeader('Үргэлжлүүлэх'),
+                  const SizedBox(height: 12),
+                  _buildAnimeRow(animeList.where((a) => a.category == 'Үргэлжлүүлэх').toList()),
+
+                  const SizedBox(height: 24),
+                  _buildSectionHeader('Шинэ гаргалтууд'),
+                  const SizedBox(height: 12),
+                  _buildAnimeRow(animeList.where((a) => a.category == 'Шинэ гаргалтууд').toList()),
+
+                  const SizedBox(height: 24),
+                  _buildSectionHeader('Өөр ертөнцөд өрнөдөг'),
+                  const SizedBox(height: 12),
+                  _buildAnimeRow(animeList.where((a) => a.category == 'Өөр ертөнцөд өрнөдөг').toList()),
+
+                  const SizedBox(height: 24),
+                  _buildSectionHeader('Онцлох'),
+                  const SizedBox(height: 12),
+                  _buildAnimeRow(animeList.where((a) => a.category == 'Онцлох').toList()),
+
+                  const SizedBox(height: 24),
+                  _buildSectionHeader('Шинжлэх ухаан'),
+                  const SizedBox(height: 12),
+                  _buildAnimeRow(animeList.where((a) => a.category == 'Шинжлэх ухаан').toList()),
+
+                  const SizedBox(height: 24),
+                  _buildSectionHeader('Цэрэг, арми'),
+                  const SizedBox(height: 12),
+                  _buildAnimeRow(animeList.where((a) => a.category == 'Цэрэг, арми').toList()),
+
+                  const SizedBox(height: 24),
+                  _buildSectionHeader('Хайр дурлал, романс'),
+                  const SizedBox(height: 12),
+                  _buildAnimeRow(animeList.where((a) => a.category == 'Хайр дурлал, романс').toList()),
+
+                  const SizedBox(height: 24),
+                  _buildSectionHeader('Урт үргэлжилсэн'),
+                  const SizedBox(height: 12),
+                  _buildAnimeRow(animeList.where((a) => a.category == 'Урт үргэлжилсэн').toList()),
+
+                  const SizedBox(height: 24),
+                  _buildSectionHeader('Спорт'),
+                  const SizedBox(height: 12),
+                  _buildAnimeRow(animeList.where((a) => a.category == 'Спорт').toList()),
+
+                  const SizedBox(height: 90),
+                ],
+              ),
+            ),
+          ),
+
+          Container(
+            height: 75,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0d1117),
+              border: Border(
+                top: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(flex: 1, child: _buildBottomNavItem(0, Icons.home_outlined, 'НҮҮР')),
+                  Flexible(flex: 1, child: _buildBottomNavItem(1, Icons.play_circle_outline, 'АНИМЕ')),
+                  Flexible(flex: 1, child: _buildBottomNavItem(2, Icons.casino_outlined, 'RANDOM')),
+                  Flexible(flex: 1, child: _buildBottomNavItem(3, Icons.movie_outlined, 'КИНО')),
+                  Flexible(flex: 1, child: _buildBottomNavItem(4, Icons.theater_comedy_outlined, 'ТЕАТР')),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnimeRow(List<AnimeItem> items) {
+    return SizedBox(
+      height: 220,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: items.length,
+        itemBuilder: (context, index) {
+          return _buildAnimeCard(items[index]);
+        },
+      ),
+    );
+  }
+
+  Widget _buildTopIcon(int index, IconData icon) {
+    return GestureDetector(
+      onTap: () => setState(() => selectedTopIcon = index),
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: selectedTopIcon == index
+              ? Colors.white.withValues(alpha: 0.2)
+              : Colors.transparent,
+        ),
+        child: Icon(
+          icon,
+          color: selectedTopIcon == index ? Colors.white : Colors.grey[600],
+          size: 24,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomNavItem(int index, IconData icon, String label) {
+    bool isSelected = selectedBottomTab == index;
+    return GestureDetector(
+      onTap: () => setState(() => selectedBottomTab = index),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            color: isSelected ? Colors.red : Colors.grey[600],
+            size: 28,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              color: isSelected ? Colors.red : Colors.grey[600],
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryChip(String label, bool isSelected) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BrowseAnimePage(category: label),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.red : const Color(0xFF1a2744),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? Colors.red : Colors.white.withOpacity(0.2),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.grey[400],
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BrowseAnimePage(category: title),
+                ),
+              );
+            },
+            child: Row(
+              children: [
+                Text(
+                  'Цааш',
+                  style: TextStyle(
+                    color: Colors.orange[700],
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 12,
+                  color: Colors.orange[700],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnimeCard(AnimeItem anime) {
+    bool showEpisodeNumber = anime.category == 'Үргэлжлүүлэх' ||
+        anime.category == 'Шинэ гаргалтууд';
+
+    return Container(
+      width: 120,
+      margin: const EdgeInsets.only(right: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.1),
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: anime.imagePath.isNotEmpty
+                    ? Image.asset(
+                  anime.imagePath,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            anime.color.withValues(alpha: 0.6),
+                            anime.color.withValues(alpha: 0.3),
+                          ],
+                        ),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.broken_image,
+                          size: 40,
+                          color: Colors.white54,
+                        ),
+                      ),
+                    );
+                  },
+                )
+                    : Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        anime.color.withValues(alpha: 0.6),
+                        anime.color.withValues(alpha: 0.3),
+                      ],
+                    ),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.play_circle_outline,
+                      size: 40,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            anime.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              height: 1.2,
+            ),
+          ),
+          if (showEpisodeNumber) const SizedBox(height: 4),
+          if (showEpisodeNumber)
+            Text(
+              '${anime.episodes}-р анги',
+              style: TextStyle(
+                color: Colors.grey[500],
+                fontSize: 11,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
